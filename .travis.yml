@@ -1,0 +1,10 @@
+language: bash
+sudo: required
+services:
+  - docker
+script:
+  - chmod ugo+x bin/*.sh
+  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && docker run -it -v $(pwd):/root/sources -e BINTRAY_USER -e BINTRAY_PASSWORD -e COVERALLS_TOKEN -e TRAVIS_BRANCH -e TRAVIS_TAG -e TRAVIS_PULL_REQUEST -e TRAVIS_BUILD_NUMBER -e TRAVIS_REPO_SLUG -w /root/sources maven:3.3.3-jdk-8 bin/build.sh || true'
+  - '[ "${TRAVIS_PULL_REQUEST}" != "false" ] && docker run -it -v $(pwd):/root/sources -w /root/sources maven:3.3.3-jdk-8 mvn clean verify --settings settings.xml || true'
+env:
+  global:

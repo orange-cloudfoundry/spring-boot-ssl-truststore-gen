@@ -1,4 +1,4 @@
-# spring-boot-ssl-truststore-gen
+# spring-boot-ssl-truststore-gen [![Build Status](https://travis-ci.org/Orange-OpenSource/truststore-generator.svg?branch=master)](https://travis-ci.org/Orange-OpenSource/truststore-generator)
 
 
 ## Features

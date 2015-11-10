@@ -14,7 +14,7 @@
  *
  */
 
-package org.springframework.boot.ssl;
+package com.orange.clara.cloud.boot.ssl;
 
 import com.orange.clara.cloud.truststore.TrustStoreGenerator;
 import org.junit.Assert;
@@ -27,15 +27,13 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.File;
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = SpringBootSslApplicationTests.SpringBootSslApplication.class)
 @WebIntegrationTest
 public class SpringBootSslApplicationTests {
 
-    public static final String SSL_TRUST_STORE_SYSTEM_PROPERTY = "javax.net.ssl.trustStore";
-    public static final String SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY = "javax.net.ssl.trustStorePassword";
+    public static final String SSL_TRUST_STORE_SYSTEM_PROPERTY = "javax.net.truststore.trustStore";
+    public static final String SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY = "javax.net.truststore.trustStorePassword";
 
 	@Test
 	public void truststore_system_properties_should_be_set() {

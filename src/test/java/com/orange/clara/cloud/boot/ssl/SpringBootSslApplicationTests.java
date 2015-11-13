@@ -32,13 +32,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @WebIntegrationTest
 public class SpringBootSslApplicationTests {
 
-    public static final String SSL_TRUST_STORE_SYSTEM_PROPERTY = "javax.net.truststore.trustStore";
-    public static final String SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY = "javax.net.truststore.trustStorePassword";
+    public static final String SSL_TRUST_STORE_SYSTEM_PROPERTY = "javax.net.ssl.trustStore";
+    public static final String SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY = "javax.net.ssl.trustStorePassword";
 
 	@Test
 	public void truststore_system_properties_should_be_set() {
-        Assert.assertNotNull(System.getProperty(TrustStoreGenerator.SSL_TRUST_STORE_SYSTEM_PROPERTY));
-        Assert.assertNotNull(System.getProperty(TrustStoreGenerator.SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY));
+        Assert.assertNotNull(System.getProperty(SSL_TRUST_STORE_SYSTEM_PROPERTY));
+        Assert.assertNotNull(System.getProperty(SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY));
 	}
 
     @SpringBootApplication

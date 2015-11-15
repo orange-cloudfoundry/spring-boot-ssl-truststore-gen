@@ -19,9 +19,11 @@ package com.orange.clara.cloud.boot.ssl;
 import com.orange.clara.cloud.truststore.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.event.ApplicationPreparedEvent;
+import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
+
+import java.time.LocalDateTime;
 
 /**
  * Provide spring boot application with a java truststore composed from :
@@ -36,7 +38,7 @@ import org.springframework.core.Ordered;
  * <P>Created by sbortolussi on 21/10/2015.
  */
 public class SslTrustStoreGeneratorListener implements
-        ApplicationListener<ApplicationPreparedEvent>, Ordered {
+        ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
 
     public static final String SSL_TRUST_STORE_SYSTEM_PROPERTY = "javax.net.ssl.trustStore";
     public static final String SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY = "javax.net.ssl.trustStorePassword";
@@ -51,18 +53,19 @@ public class SslTrustStoreGeneratorListener implements
     }
 
     @Override
-    public void onApplicationEvent(ApplicationPreparedEvent applicationPreparedEvent) {
-
+    public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
         try {
+            LOGGER.debug("ApplicationEnvironmentPreparedEvent raised at {}", LocalDateTime.now());
             TrustStorePropertyReader keyStorePropertyReader = new TrustStoreStorePropertyJsonReader();
             final TrustStoreProperty keyStoreProperty = keyStorePropertyReader.read(getSystemProperty(KEYSTORE_PROPERTY_NAME));
-            LOGGER.info("Generating truststore file");
+            LOGGER.info("following additional CA Certificates have been defined in KEYSTORE system property {}", keyStoreProperty.getCertificates());
+            LOGGER.info("Generating truststore...");
             TrustStoreGenerator keyStoreGenerator = new TrustStoreGenerator();
             final TrustStoreInfo trustStoreInfo = keyStoreGenerator.generateFromDefaultTrustStore(keyStoreProperty);
             System.setProperty(SSL_TRUST_STORE_SYSTEM_PROPERTY, trustStoreInfo.getTrustStorefFile().getAbsolutePath());
-            LOGGER.info("Setting " + SSL_TRUST_STORE_SYSTEM_PROPERTY + " system property to " + trustStoreInfo.getTrustStorefFile().getAbsolutePath());
+            LOGGER.info("Setting {} system property to {}", SSL_TRUST_STORE_SYSTEM_PROPERTY, trustStoreInfo.getTrustStorefFile().getAbsolutePath());
             System.setProperty(SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY, trustStoreInfo.getPassword());
-            LOGGER.info("Setting " + SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY + " system property to " + trustStoreInfo.getPassword());
+            LOGGER.info("Setting {} system property to {}", SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY, trustStoreInfo.getPassword());
         } catch (Exception e) {
             String message = "Cannot create truststore.";
             LOGGER.error(message);

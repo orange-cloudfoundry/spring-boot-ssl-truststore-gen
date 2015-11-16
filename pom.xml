@@ -71,5 +71,55 @@
 
 	</build>
 
+	<profiles>
+		<profile>
+			<id>ojo-build-info</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jfrog.buildinfo</groupId>
+						<artifactId>artifactory-maven-plugin</artifactId>
+						<version>2.4.0</version>
+						<executions>
+							<execution>
+								<id>build-info</id>
+								<goals>
+									<goal>publish</goal>
+								</goals>
+								<configuration>
+									<deployProperties>
+										<githubRepo>${env.TRAVIS_REPO_SLUG}</githubRepo>
+									</deployProperties>
+									<artifactory>
+										<envVarsIncludePatterns>*TRAVIS*</envVarsIncludePatterns>
+										<includeEnvVars>true</includeEnvVars>
+									</artifactory>
+									<publisher>
+										<contextUrl>https://oss.jfrog.org</contextUrl>
+										<username>${env.BINTRAY_USER}</username>
+										<password>${env.BINTRAY_PASSWORD}</password>
+										<repoKey>oss-release-local</repoKey>
+										<snapshotRepoKey>oss-snapshot-local</snapshotRepoKey>
+									</publisher>
+									<buildInfo>
+										<buildName>${project.artifactId}</buildName>
+										<buildNumber>{{TRAVIS_BUILD_NUMBER|CI_BUILD_NUMBER|BUILD_NUMBER}}
+										</buildNumber>
+										<buildUrl>{{CI_BUILD_URL|BUILD_URL}}</buildUrl>
+									</buildInfo>
+									<licenses>
+										<autoDiscover>false</autoDiscover>
+										<includePublishedArtifacts>false</includePublishedArtifacts>
+										<runChecks>false</runChecks>
+										<scopes>compile,runtime</scopes>
+									</licenses>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>

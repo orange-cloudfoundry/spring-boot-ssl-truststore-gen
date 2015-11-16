@@ -19,7 +19,7 @@ package com.orange.clara.cloud.boot.ssl;
 import com.orange.clara.cloud.truststore.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 
@@ -38,7 +38,7 @@ import java.time.LocalDateTime;
  * <P>Created by sbortolussi on 21/10/2015.
  */
 public class SslTrustStoreGeneratorListener implements
-        ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
+        ApplicationListener<ApplicationStartedEvent>, Ordered {
 
     public static final String SSL_TRUST_STORE_SYSTEM_PROPERTY = "javax.net.ssl.trustStore";
     public static final String SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY = "javax.net.ssl.trustStorePassword";
@@ -53,7 +53,7 @@ public class SslTrustStoreGeneratorListener implements
     }
 
     @Override
-    public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
+    public void onApplicationEvent(ApplicationStartedEvent event) {
         try {
             LOGGER.debug("ApplicationEnvironmentPreparedEvent raised at {}", LocalDateTime.now());
             TrustStorePropertyReader keyStorePropertyReader = new TrustStoreStorePropertyJsonReader();

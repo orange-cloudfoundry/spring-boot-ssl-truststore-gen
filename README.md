@@ -5,7 +5,7 @@
 
 Provides spring boot application with a [java SSL truststore](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html#CustomizingStores) made up of :
  * default truststore CA certificates
- * additional CA certificates extracted from a custom <i>TRUSTORE</i> System property
+ * additional CA certificates extracted from a custom <i>TRUSTSTORE</i> System property
 
 The [java SSL truststore](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html#CustomizingStores) will be accessible through <i>javax.net.ssl.trustStore</i> and <i>javax.net.ssl.trustStorePassword</i> system properties.
  
@@ -33,7 +33,7 @@ Example for maven
         </dependency>
 ```
 
-and set a <i>TRUSTORE</i> System property with CA Certificates to add to default java trustore
+and set a <i>TRUSTSTORE</i> System property with CA Certificates to add to default java trustore
 
 
 ## Details

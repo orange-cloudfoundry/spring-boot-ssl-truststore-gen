@@ -16,9 +16,7 @@
 
 package com.orange.clara.cloud.boot.ssl;
 
-import com.orange.clara.cloud.truststore.TrustStoreGenerator;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.SpringApplication;
@@ -35,11 +33,11 @@ public class SpringBootSslApplicationTests {
     public static final String SSL_TRUST_STORE_SYSTEM_PROPERTY = "javax.net.ssl.trustStore";
     public static final String SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY = "javax.net.ssl.trustStorePassword";
 
-	@Test
-	public void truststore_system_properties_should_be_set() {
+    @Test
+    public void truststore_system_properties_should_be_set() {
         Assert.assertNotNull(System.getProperty(SSL_TRUST_STORE_SYSTEM_PROPERTY));
         Assert.assertNotNull(System.getProperty(SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY));
-	}
+    }
 
     @SpringBootApplication
     public static class SpringBootSslApplication {

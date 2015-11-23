@@ -43,7 +43,7 @@ public class SslTrustStoreGeneratorListener implements
     public static final String SSL_TRUST_STORE_SYSTEM_PROPERTY = "javax.net.ssl.trustStore";
     public static final String SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY = "javax.net.ssl.trustStorePassword";
 
-    public static final String KEYSTORE_PROPERTY_NAME = "KEYSTORE";
+    public static final String TRUSTSTORE_PROPERTY_NAME = "TRUSTSTORE";
 
     private static Logger LOGGER = LoggerFactory.getLogger(SslTrustStoreGeneratorListener.class);
 
@@ -57,8 +57,8 @@ public class SslTrustStoreGeneratorListener implements
         try {
             LOGGER.debug("ApplicationEnvironmentPreparedEvent raised at {}", LocalDateTime.now());
             TrustStorePropertyReader keyStorePropertyReader = new TrustStoreStorePropertyJsonReader();
-            final TrustStoreProperty keyStoreProperty = keyStorePropertyReader.read(getSystemProperty(KEYSTORE_PROPERTY_NAME));
-            LOGGER.info("following additional CA Certificates have been defined in KEYSTORE system property {}", keyStoreProperty.getCertificates());
+            final TrustStoreProperty keyStoreProperty = keyStorePropertyReader.read(getSystemProperty(TRUSTSTORE_PROPERTY_NAME));
+            LOGGER.info("following additional CA Certificates have been defined in {] system property {}", TRUSTSTORE_PROPERTY_NAME, keyStoreProperty.getCertificates());
             LOGGER.info("Generating truststore...");
             TrustStoreGenerator keyStoreGenerator = new TrustStoreGenerator();
             final TrustStoreInfo trustStoreInfo = keyStoreGenerator.generateFromDefaultTrustStore(keyStoreProperty);

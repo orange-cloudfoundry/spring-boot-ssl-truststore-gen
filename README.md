@@ -31,9 +31,9 @@ Example for maven
 
 ```
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-ssl</artifactId>
-            <version>0.1-SNAPSHOT</version>
+                <groupId>com.orange.clara.cloud.boot.ssl-truststore-gen</groupId>
+                <artifactId>spring-boot-ssl-truststore-gen</artifactId>
+                <version>1.0.14</version>
         </dependency>
 ```
 

@@ -49,23 +49,30 @@ public class SslTrustStoreGeneratorListener implements
 
     private int order = HIGHEST_PRECEDENCE;
 
+    private PropertyResolver propertyResolver = new PropertyResolver();
+
+    private TrustStoreGenerator keyStoreGenerator = new TrustStoreGenerator();
+
     public SslTrustStoreGeneratorListener() {
     }
 
-    @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
         try {
             LOGGER.debug("ApplicationEnvironmentPreparedEvent raised at {}", LocalDateTime.now());
             TrustStorePropertyReader keyStorePropertyReader = new TrustStoreStorePropertyJsonReader();
-            final TrustStoreProperty keyStoreProperty = keyStorePropertyReader.read(getSystemProperty(TRUSTSTORE_PROPERTY_NAME));
-            LOGGER.info("following additional CA Certificates have been defined in {] system property {}", TRUSTSTORE_PROPERTY_NAME, keyStoreProperty.getCertificates());
-            LOGGER.info("Generating truststore...");
-            TrustStoreGenerator keyStoreGenerator = new TrustStoreGenerator();
-            final TrustStoreInfo trustStoreInfo = keyStoreGenerator.generateFromDefaultTrustStore(keyStoreProperty);
-            System.setProperty(SSL_TRUST_STORE_SYSTEM_PROPERTY, trustStoreInfo.getTrustStorefFile().getAbsolutePath());
-            LOGGER.info("Setting {} system property to {}", SSL_TRUST_STORE_SYSTEM_PROPERTY, trustStoreInfo.getTrustStorefFile().getAbsolutePath());
-            System.setProperty(SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY, trustStoreInfo.getPassword());
-            LOGGER.info("Setting {} system property to {}", SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY, trustStoreInfo.getPassword());
+            final String truststore = propertyResolver.getSystemProperty(TRUSTSTORE_PROPERTY_NAME);
+            if (!"".equals(truststore)) {
+                final TrustStoreProperty keyStoreProperty = keyStorePropertyReader.read(truststore);
+                LOGGER.info("following additional CA Certificates have been defined in {] system property {}", TRUSTSTORE_PROPERTY_NAME, keyStoreProperty.getCertificates());
+                LOGGER.info("Generating truststore...");
+                final TrustStoreInfo trustStoreInfo = keyStoreGenerator.generateFromDefaultTrustStore(keyStoreProperty);
+                System.setProperty(SSL_TRUST_STORE_SYSTEM_PROPERTY, trustStoreInfo.getTrustStorefFile().getAbsolutePath());
+                LOGGER.info("Setting {} system property to {}", SSL_TRUST_STORE_SYSTEM_PROPERTY, trustStoreInfo.getTrustStorefFile().getAbsolutePath());
+                System.setProperty(SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY, trustStoreInfo.getPassword());
+                LOGGER.info("Setting {} system property to {}", SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY, trustStoreInfo.getPassword());
+            } else {
+                LOGGER.warn("No additional CA certificate has been defined using {} system property", TRUSTSTORE_PROPERTY_NAME);
+            }
         } catch (Exception e) {
             String message = "Cannot create truststore.";
             LOGGER.error(message);
@@ -75,17 +82,20 @@ public class SslTrustStoreGeneratorListener implements
 
     }
 
-    private String getSystemProperty(String propertyName) {
-        String keystore = (System.getProperty(propertyName) != null ? System.getProperty(propertyName) : System.getenv(propertyName));
-        if (keystore == null) {
-            throw new IllegalStateException("System property '" + propertyName + "' has not been defined.");
-        }
-        return keystore;
-    }
-
-    @Override
     public int getOrder() {
         return order;
     }
 
+    class PropertyResolver {
+        public String getSystemProperty(String propertyName) {
+            String keystore = (System.getProperty(propertyName) != null ? System.getProperty(propertyName) : System.getenv(propertyName));
+            if (keystore == null) {
+                throw new IllegalStateException("System property '" + propertyName + "' has not been defined.");
+            }
+            return keystore;
+        }
+    }
+
 }
+
+

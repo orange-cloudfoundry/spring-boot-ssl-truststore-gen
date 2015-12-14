@@ -16,14 +16,11 @@
 
 package com.orange.clara.cloud.boot.ssl;
 
-import com.orange.clara.cloud.truststore.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
-
-import java.time.LocalDateTime;
 
 /**
  * Provide spring boot application with a java truststore composed from :
@@ -43,7 +40,7 @@ public class SslTrustStoreGeneratorListener implements
     public static final String SSL_TRUST_STORE_SYSTEM_PROPERTY = "javax.net.ssl.trustStore";
     public static final String SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY = "javax.net.ssl.trustStorePassword";
 
-    public static final String TRUSTSTORE_PROPERTY_NAME = "TRUSTSTORE";
+    public static final String TRUSTED_CA_CERTIFICATE_PROPERTY_NAME = "TRUSTED_CA_CERTIFICATE";
 
     private static Logger LOGGER = LoggerFactory.getLogger(SslTrustStoreGeneratorListener.class);
 
@@ -51,27 +48,23 @@ public class SslTrustStoreGeneratorListener implements
 
     private PropertyResolver propertyResolver = new PropertyResolver();
 
-    private TrustStoreGenerator keyStoreGenerator = new TrustStoreGenerator();
+    private DefaultTrustStoreAppender trustStoreAppender = new DefaultTrustStoreAppender();
 
     public SslTrustStoreGeneratorListener() {
     }
 
     public void onApplicationEvent(ApplicationStartedEvent event) {
         try {
-            LOGGER.debug("ApplicationEnvironmentPreparedEvent raised at {}", LocalDateTime.now());
-            TrustStorePropertyReader keyStorePropertyReader = new TrustStoreStorePropertyJsonReader();
-            final String truststore = propertyResolver.getSystemProperty(TRUSTSTORE_PROPERTY_NAME);
-            if (!"".equals(truststore)) {
-                final TrustStoreProperty keyStoreProperty = keyStorePropertyReader.read(truststore);
-                LOGGER.info("following additional CA Certificates have been defined in {] system property {}", TRUSTSTORE_PROPERTY_NAME, keyStoreProperty.getCertificates());
-                LOGGER.info("Generating truststore...");
-                final TrustStoreInfo trustStoreInfo = keyStoreGenerator.generateFromDefaultTrustStore(keyStoreProperty);
+            final String certificate = propertyResolver.getSystemProperty(TRUSTED_CA_CERTIFICATE_PROPERTY_NAME);
+            if (!"".equals(certificate)) {
+                LOGGER.info("Following additional CA Certificate has been defined in {} system property : {}", TRUSTED_CA_CERTIFICATE_PROPERTY_NAME, certificate);
+                final TrustStoreInfo trustStoreInfo = trustStoreAppender.append(CertificateFactory.newInstance(certificate));
                 System.setProperty(SSL_TRUST_STORE_SYSTEM_PROPERTY, trustStoreInfo.getTrustStorefFile().getAbsolutePath());
                 LOGGER.info("Setting {} system property to {}", SSL_TRUST_STORE_SYSTEM_PROPERTY, trustStoreInfo.getTrustStorefFile().getAbsolutePath());
                 System.setProperty(SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY, trustStoreInfo.getPassword());
                 LOGGER.info("Setting {} system property to {}", SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY, trustStoreInfo.getPassword());
             } else {
-                LOGGER.warn("No additional CA certificate has been defined using {} system property", TRUSTSTORE_PROPERTY_NAME);
+                LOGGER.warn("No additional CA certificate has been defined using {} system property", TRUSTED_CA_CERTIFICATE_PROPERTY_NAME);
             }
         } catch (Exception e) {
             String message = "Cannot create truststore.";

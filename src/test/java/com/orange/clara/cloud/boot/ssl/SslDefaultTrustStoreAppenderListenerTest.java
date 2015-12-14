@@ -16,7 +16,6 @@
 
 package com.orange.clara.cloud.boot.ssl;
 
-import com.orange.clara.cloud.truststore.TrustStoreGenerator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -38,7 +37,7 @@ import static org.junit.Assert.assertThat;
  * Created by sbortolussi on 09/12/2015.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class SslTrustStoreGeneratorListenerTest {
+public class SslDefaultTrustStoreAppenderListenerTest {
 
     @Mock
     private ApplicationStartedEvent event;
@@ -49,7 +48,7 @@ public class SslTrustStoreGeneratorListenerTest {
     private SslTrustStoreGeneratorListener sslTrustStoreGeneratorListener;
 
     @Mock
-    TrustStoreGenerator keyStoreGenerator;
+    DefaultTrustStoreAppender trustStoreAppender;
 
     @Rule
     public OutputCapture capture = new OutputCapture();
@@ -62,25 +61,25 @@ public class SslTrustStoreGeneratorListenerTest {
         ReflectionUtils.makeAccessible(envField);
         ReflectionUtils.setField(envField, sslTrustStoreGeneratorListener, propertyResolver);
         Field sslCertTrusterField = ReflectionUtils.findField(SslTrustStoreGeneratorListener.class,
-                "keyStoreGenerator");
+                "trustStoreAppender");
         ReflectionUtils.makeAccessible(sslCertTrusterField);
-        ReflectionUtils.setField(sslCertTrusterField, sslTrustStoreGeneratorListener, keyStoreGenerator);
+        ReflectionUtils.setField(sslCertTrusterField, sslTrustStoreGeneratorListener, trustStoreAppender);
     }
 
     @Test
     public void should_do_no_changes_if_no_certificate_is_set_in_TRUSTSTORE_SYSTEM_property() throws Exception {
-        Mockito.when(propertyResolver.getSystemProperty("TRUSTSTORE")).thenReturn("");
+        Mockito.when(propertyResolver.getSystemProperty(SslTrustStoreGeneratorListener.TRUSTED_CA_CERTIFICATE_PROPERTY_NAME)).thenReturn("");
         sslTrustStoreGeneratorListener.onApplicationEvent(event);
-        Mockito.verifyZeroInteractions(keyStoreGenerator);
+        Mockito.verifyZeroInteractions(trustStoreAppender);
         Assert.assertNull(System.getProperty(SslTrustStoreGeneratorListener.SSL_TRUST_STORE_SYSTEM_PROPERTY));
         Assert.assertNull(System.getProperty(SslTrustStoreGeneratorListener.SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY));
     }
 
     @Test
     public void should_log_warning_if_no_certificate_is_set_in_TRUSTSTORE_SYSTEM_property() throws Exception {
-        Mockito.when(propertyResolver.getSystemProperty("TRUSTSTORE")).thenReturn("");
+        Mockito.when(propertyResolver.getSystemProperty(SslTrustStoreGeneratorListener.TRUSTED_CA_CERTIFICATE_PROPERTY_NAME)).thenReturn("");
         sslTrustStoreGeneratorListener.onApplicationEvent(event);
-        assertThat(capture.toString(), containsString("No additional CA certificate has been defined using TRUSTSTORE system property"));
+        assertThat(capture.toString(), containsString("No additional CA certificate has been defined using "+SslTrustStoreGeneratorListener.TRUSTED_CA_CERTIFICATE_PROPERTY_NAME+" system property"));
     }
 
     @Test(expected = IllegalStateException.class)

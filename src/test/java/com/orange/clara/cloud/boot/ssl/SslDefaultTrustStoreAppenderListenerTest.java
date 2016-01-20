@@ -26,10 +26,10 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.test.OutputCapture;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.mock.env.MockEnvironment;
 
-import java.lang.reflect.Field;
-
+import static com.orange.clara.cloud.boot.ssl.SslTrustStoreGeneratorListener.*;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
@@ -42,9 +42,6 @@ public class SslDefaultTrustStoreAppenderListenerTest {
     @Mock
     private ApplicationStartedEvent event;
 
-    @Mock
-    private SslTrustStoreGeneratorListener.PropertyResolver propertyResolver;
-
     private SslTrustStoreGeneratorListener sslTrustStoreGeneratorListener;
 
     @Mock
@@ -56,35 +53,33 @@ public class SslDefaultTrustStoreAppenderListenerTest {
 
     @Before
     public void setup() throws IllegalArgumentException, IllegalAccessException {
-        sslTrustStoreGeneratorListener = new SslTrustStoreGeneratorListener();
-        Field envField = ReflectionUtils.findField(SslTrustStoreGeneratorListener.class, "propertyResolver");
-        ReflectionUtils.makeAccessible(envField);
-        ReflectionUtils.setField(envField, sslTrustStoreGeneratorListener, propertyResolver);
-        Field sslCertTrusterField = ReflectionUtils.findField(SslTrustStoreGeneratorListener.class,
-                "trustStoreAppender");
-        ReflectionUtils.makeAccessible(sslCertTrusterField);
-        ReflectionUtils.setField(sslCertTrusterField, sslTrustStoreGeneratorListener, trustStoreAppender);
+        sslTrustStoreGeneratorListener = new SslTrustStoreGeneratorListener(new StandardEnvironment())
+                .setTrustStoreAppender(trustStoreAppender);
     }
 
     @Test
     public void should_do_no_changes_if_no_certificate_is_set_in_TRUSTSTORE_SYSTEM_property() throws Exception {
-        Mockito.when(propertyResolver.getSystemProperty(SslTrustStoreGeneratorListener.TRUSTED_CA_CERTIFICATE_PROPERTY_NAME)).thenReturn("");
+        MockEnvironment mockEnv=new MockEnvironment().withProperty(TRUSTED_CA_CERTIFICATE_PROPERTY_NAME,"");
+        sslTrustStoreGeneratorListener.setEnvironment(mockEnv);
+
         sslTrustStoreGeneratorListener.onApplicationEvent(event);
         Mockito.verifyZeroInteractions(trustStoreAppender);
-        Assert.assertNull(System.getProperty(SslTrustStoreGeneratorListener.SSL_TRUST_STORE_SYSTEM_PROPERTY));
-        Assert.assertNull(System.getProperty(SslTrustStoreGeneratorListener.SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY));
+        Assert.assertNull(System.getProperty(SSL_TRUST_STORE_SYSTEM_PROPERTY));
+        Assert.assertNull(System.getProperty(SSL_TRUST_STORE_PASSWORD_SYSTEM_PROPERTY));
     }
 
     @Test
     public void should_log_warning_if_no_certificate_is_set_in_TRUSTSTORE_SYSTEM_property() throws Exception {
-        Mockito.when(propertyResolver.getSystemProperty(SslTrustStoreGeneratorListener.TRUSTED_CA_CERTIFICATE_PROPERTY_NAME)).thenReturn("");
+        MockEnvironment mockEnv=new MockEnvironment().withProperty(TRUSTED_CA_CERTIFICATE_PROPERTY_NAME,"");
+        sslTrustStoreGeneratorListener.setEnvironment(mockEnv);
         sslTrustStoreGeneratorListener.onApplicationEvent(event);
-        assertThat(capture.toString(), containsString("No additional CA certificate has been defined using "+SslTrustStoreGeneratorListener.TRUSTED_CA_CERTIFICATE_PROPERTY_NAME+" system property"));
+        assertThat(capture.toString(), containsString("No additional CA certificate has been defined using "+ TRUSTED_CA_CERTIFICATE_PROPERTY_NAME+" system property"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void should_fail_if_no_TRUSTSTORE_SYSTEM_property_exists() throws Exception {
-        SslTrustStoreGeneratorListener.PropertyResolver resolver = sslTrustStoreGeneratorListener.new PropertyResolver();
-        resolver.getSystemProperty("dummy");
+        MockEnvironment mockEnv=new MockEnvironment();
+        sslTrustStoreGeneratorListener.setEnvironment(mockEnv);
+        sslTrustStoreGeneratorListener.onApplicationEvent(event);
     }
 }
